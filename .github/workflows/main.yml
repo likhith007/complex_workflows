@@ -28,18 +28,36 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
-      - name: Show PR changed directories
-        run: |
-          # Get the pull request number from the github context
-          pr_number=${{ github.event.number }}
+#       - name: Show PR changed directories
+#         run: |
+#           # Get the pull request number from the github context
+#           pr_number=${{ github.event.number }}
 
-          # Get the PR branch and base branch
-          pr_head=${{ github.event.pull_request.head.ref }}
-          pr_base=${{ github.event.pull_request.base.ref }}
+#           # Get the PR branch and base branch
+#           pr_head=${{ github.event.pull_request.head.ref }}
+#           pr_base=${{ github.event.pull_request.base.ref }}
 
-          # Get the changes in the PR using git diff and filter directories
-          pr_changes=$(git diff --name-only FETCH_HEAD | grep '/' | cut -d'/' -f1)
+#           # Get the changes in the PR using git diff and filter directories
+#           pr_changes=$(git diff --name-only FETCH_HEAD | grep '/' | cut -d'/' -f1)
 
-          # Print the list of changed directories
-          echo "Directories changed in PR #${pr_number}:"
-          echo "$pr_changes"
+#           # Print the list of changed directories
+#           echo "Directories changed in PR #${pr_number}:"
+#           echo "$pr_changes"
+
+      - name: Get the pull request number
+        id: pr-number
+        uses: actions/github-script@v3
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const changedDirectories = [];
+            for (const file of context.payload.pull_request.files) {
+              const directory = file.filename.split('/').slice(0, -1).join('/');
+              changedDirectories.push(directory);
+              }
+            return { prNumber, changedDirectories };
+
+      - name: Print changed directories
+        run:  |
+              echo "Directories changed in PR #${{ steps.pr-number.outputs.prNumber }}:" 
+              echo "${{ steps.get-changed-directories.outputs.changedDirectories }}"
