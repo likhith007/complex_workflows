@@ -38,7 +38,7 @@ jobs:
           pr_base=${{ github.event.pull_request.base.ref }}
 
           # Get the changes in the PR using git diff and filter directories
-          pr_changes=$(git diff --name-only $pr_base...$pr_head | grep '/' | cut -d/ -f1 | sort -u)
+          pr_changes=$(git diff --name-only $pr_base...$pr_head | grep -v '^[/]*.git')
 
           # Print the list of changed directories
           echo "Directories changed in PR #${pr_number}:"
